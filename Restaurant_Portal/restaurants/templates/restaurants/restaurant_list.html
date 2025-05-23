@@ -1,0 +1,58 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista restauracji</title>
+  <link rel="stylesheet" href="{% static 'restaurants/css/restaurant_list.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <h1>Lista restauracji</h1>
+
+  <form method="get" class="filter-form">
+    <input type="text" name="search" placeholder="Szukaj po nazwie..." value="{{ request.GET.search }}">
+    <select name="sort">
+      <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Nazwa A–Z</option>
+      <option value="-name" {% if request.GET.sort == '-name' %}selected{% endif %}>Nazwa Z–A</option>
+      <option value="-average_rating" {% if request.GET.sort == '-average_rating' %}selected{% endif %}>Ocena malejąco</option>
+      <option value="average_rating" {% if request.GET.sort == 'average_rating' %}selected{% endif %}>Ocena rosnąco</option>
+    </select>
+    <button type="submit">Filtruj</button>
+  </form>
+
+  <div class="restaurant-grid">
+    {% for restaurant in restaurants %}
+      <a href="{% url 'restaurant_detail' restaurant.pk %}" class="card">
+        <div class="card-content">
+            <span class="restaurant-name">
+                <i class="fas fa-utensils"></i> {{ restaurant.name }}
+            </span>
+            <span class="address">
+                <i class="fas fa-map-marker-alt"></i> {{ restaurant.address }}
+            </span>
+            <span class="cuisine">
+                <i class="fas fa-pepper-hot"></i> {{ restaurant.cuisine_type }}
+            </span>
+            <div class="rating">
+                <i class="fas fa-star"></i>
+                Ocena:
+                {% with rating=restaurant.average_rating %}
+                {% if rating %}
+                    {{ rating|floatformat:1 }}/5
+                {% else %}
+                    Brak ocen
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+      </a>
+    {% empty %}
+      <div class="no-data">Brak restauracji do wyświetlenia.</div>
+    {% endfor %}
+  </div>
+
+</body>
+</html>

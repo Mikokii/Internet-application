@@ -1,0 +1,54 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ restaurant.name }}</title>
+  <link rel="stylesheet" href="{% static 'restaurants/css/restaurant_detail.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>{{ restaurant.name }}</h1>
+
+    <div class="details">
+      <p class="detail-item">
+        <i class="fas fa-map-marker-alt"></i>
+        <strong>Adres:</strong> {{ restaurant.address }}
+      </p>
+      <p class="detail-item">
+        <i class="fas fa-pepper-hot"></i>
+        <strong>Kuchnia:</strong> {{ restaurant.cuisine_type }}
+      </p>
+      <p class="detail-item">
+        <i class="fas fa-star"></i>
+        <strong>Średnia ocena:</strong> {{ restaurant.get_average_rating|floatformat:1 }}/5
+      </p>
+    </div>
+
+    <h2>Komentarze</h2>
+    <ul class="comment-list">
+      {% for comment in comments %}
+        <li class="comment-item">
+          <div class="comment-header">
+            <i class="fas fa-user"></i>
+            <span class="comment-author">{{ comment.author }}</span>
+            <span class="comment-rating">({{ comment.rating }}/5)</span>
+          </div>
+          <p class="comment-text">{{ comment.text }}</p>
+          <small class="comment-date">
+            <i class="fas fa-calendar-alt"></i> {{ comment.created_at }}
+          </small>
+        </li>
+      {% empty %}
+        <li class="comment-item">Brak komentarzy.</li>
+      {% endfor %}
+    </ul>
+
+    <a href="{% url 'restaurant_list' %}" class="back-link">
+      <i class="fas fa-arrow-left"></i> Powrót do listy
+    </a>
+  </div>
+</body>
+</html>
