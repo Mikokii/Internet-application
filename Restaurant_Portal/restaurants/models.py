@@ -1,11 +1,19 @@
 from django.db import models
 from django.db.models import Avg
 from django.core.validators import MinValueValidator, MaxValueValidator
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderServiceError
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     cuisine_type = models.CharField(max_length=100)
+    latitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
+    longitude = models.DecimalField(
+        max_digits=9, decimal_places=6, null=True, blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -13,6 +21,22 @@ class Restaurant(models.Model):
     def get_average_rating(self):
         average = self.comments.aggregate(avg=Avg('rating'))['avg']
         return round(average, 1) if average is not None else 0.0
+    
+    def save(self, *args, **kwargs):
+        # Jeśli nie mamy współrzędnych, spróbuj geokodować na podstawie adresu
+        if self.address and (self.latitude is None or self.longitude is None):
+            geolocator = Nominatim(user_agent="restaurant_portal")
+            try:
+                location = geolocator.geocode(self.address, language='pl')
+                if location:
+                    self.latitude = round(location.latitude, 6)
+                    self.longitude = round(location.longitude, 6)
+                print(location)
+                print(self.address)
+            except GeocoderServiceError:
+                pass
+
+        super().save(*args, **kwargs)
 
 class Comment(models.Model):
     restaurant = models.ForeignKey(

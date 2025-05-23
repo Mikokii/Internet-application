@@ -7,6 +7,8 @@
   <title>{{ restaurant.name }}</title>
   <link rel="stylesheet" href="{% static 'restaurants/css/restaurant_detail.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
   <div class="container">
@@ -26,6 +28,16 @@
         <strong>Średnia ocena:</strong> {{ restaurant.get_average_rating|floatformat:1 }}/5
       </p>
     </div>
+
+    <!-- Map -->
+    {% if restaurant.latitude and restaurant.longitude %}
+      <div
+        id="map"
+        class="map-container"
+        data-lat="{{ restaurant.latitude }}"
+        data-lng="{{ restaurant.longitude }}">
+      </div>
+    {% endif %}
 
     <h2>Komentarze</h2>
     <ul class="comment-list">
@@ -50,5 +62,21 @@
       <i class="fas fa-arrow-left"></i> Powrót do listy
     </a>
   </div>
-</body>
-</html>
+
+    <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var mapEl = document.getElementById('map');
+      if (!mapEl) return;
+      var lat = parseFloat(mapEl.dataset.lat);
+      var lng = parseFloat(mapEl.dataset.lng);
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      var map = L.map('map').setView([lat, lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      L.marker([lat, lng]).addTo(map);
+    });
+  </script>
