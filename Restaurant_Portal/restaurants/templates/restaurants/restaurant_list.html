@@ -20,6 +20,11 @@
       <option value="-average_rating" {% if request.GET.sort == '-average_rating' %}selected{% endif %}>Ocena malejąco</option>
       <option value="average_rating" {% if request.GET.sort == 'average_rating' %}selected{% endif %}>Ocena rosnąco</option>
     </select>
+     <input type="text" name="address" placeholder="Twój adres (opcjonalny)" value="{{ request.GET.address }}">
+  
+    <label for="distance">Maksymalna odległość (km): <span id="distance-value">{{ request.GET.distance|default:10 }}</span></label>
+    <input type="range" name="distance" id="distance" min="1" max="100" value="{{ request.GET.distance|default:10 }}" oninput="document.getElementById('distance-value').innerText = this.value">
+
     <button type="submit">Filtruj</button>
   </form>
 
@@ -46,6 +51,9 @@
                     Brak ocen
                 {% endif %}
                 {% endwith %}
+            </div>
+            <div class="distance">
+              <i class="fas fa-location-arrow"></i> Odległość: {{ restaurant.distance_km }} km
             </div>
         </div>
       </a>
