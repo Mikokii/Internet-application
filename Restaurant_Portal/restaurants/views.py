@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render
-from .models import Restaurant
+from .models import CuisineType, Restaurant
 from django.db.models import Avg
 from geopy.distance import distance as geopy_distance
 from geopy.geocoders import Nominatim
@@ -39,6 +39,7 @@ def safe_sort_key(r, field):
 def restaurant_list(request):
     search_query = request.GET.get('search', '')
     sort_by = request.GET.get('sort', 'name')
+    cuisine_filter = request.GET.get('cuisine', '')
     address_input = request.GET.get('address', '')
     max_distance_km = float(request.GET.get('distance', 10))
 
@@ -55,12 +56,17 @@ def restaurant_list(request):
             user_ip = '83.8.161.168'
         user_location = get_coordinates_from_ip(user_ip)
 
+    all_cuisines = CuisineType.objects.all()
+
     # Filtrowanie i anotacja
     restaurants = Restaurant.objects.filter(
         name__icontains=search_query
     ).annotate(
         average_rating=Avg('comments__rating')
     )
+
+    if cuisine_filter:
+        restaurants = restaurants.filter(cuisine_types__name__icontains=cuisine_filter)
 
     # Filtruj według odległości jeśli lokalizacja dostępna
     if user_location:
@@ -81,7 +87,9 @@ def restaurant_list(request):
         )
 
     return render(request, 'restaurants/restaurant_list.html', {
-        'restaurants': restaurants
+        'restaurants': restaurants,
+        'all_cuisines': all_cuisines,
+        'selected_cuisine': cuisine_filter,
     })
 
 def restaurant_detail(request, pk):

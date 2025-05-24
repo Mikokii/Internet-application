@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -14,16 +13,31 @@
 
   <form method="get" class="filter-form">
     <input type="text" name="search" placeholder="Szukaj po nazwie..." value="{{ request.GET.search }}">
+
+    <select name="cuisine">
+      <option value="">Wszystkie kuchnie</option>
+      {% for cuisine in all_cuisines %}
+        <option value="{{ cuisine.name }}" {% if cuisine.name == selected_cuisine %}selected{% endif %}>
+          {{ cuisine.name }}
+        </option>
+      {% endfor %}
+    </select>
+
     <select name="sort">
       <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Nazwa A–Z</option>
       <option value="-name" {% if request.GET.sort == '-name' %}selected{% endif %}>Nazwa Z–A</option>
       <option value="-average_rating" {% if request.GET.sort == '-average_rating' %}selected{% endif %}>Ocena malejąco</option>
       <option value="average_rating" {% if request.GET.sort == 'average_rating' %}selected{% endif %}>Ocena rosnąco</option>
     </select>
-     <input type="text" name="address" placeholder="Twój adres (opcjonalny)" value="{{ request.GET.address }}">
-  
-    <label for="distance">Maksymalna odległość (km): <span id="distance-value">{{ request.GET.distance|default:10 }}</span></label>
-    <input type="range" name="distance" id="distance" min="1" max="100" value="{{ request.GET.distance|default:10 }}" oninput="document.getElementById('distance-value').innerText = this.value">
+
+    <input type="text" name="address" placeholder="Twój adres (opcjonalny)" value="{{ request.GET.address }}">
+
+    <label for="distance">
+      Maksymalna odległość (km): <span id="distance-value">{{ request.GET.distance|default:5 }}</span>
+    </label>
+    <input type="range" name="distance" id="distance" min="1" max="25" 
+           value="{{ request.GET.distance|default:5 }}" 
+           oninput="document.getElementById('distance-value').innerText = this.value">
 
     <button type="submit">Filtruj</button>
   </form>
@@ -32,29 +46,29 @@
     {% for restaurant in restaurants %}
       <a href="{% url 'restaurant_detail' restaurant.pk %}" class="card">
         <div class="card-content">
-            <span class="restaurant-name">
-                <i class="fas fa-utensils"></i> {{ restaurant.name }}
-            </span>
-            <span class="address">
-                <i class="fas fa-map-marker-alt"></i> {{ restaurant.address }}
-            </span>
-            <span class="cuisine">
-                <i class="fas fa-pepper-hot"></i> {{ restaurant.cuisine_type }}
-            </span>
-            <div class="rating">
-                <i class="fas fa-star"></i>
-                Ocena:
-                {% with rating=restaurant.average_rating %}
-                {% if rating %}
-                    {{ rating|floatformat:1 }}/5
-                {% else %}
-                    Brak ocen
-                {% endif %}
-                {% endwith %}
-            </div>
-            <div class="distance">
-              <i class="fas fa-location-arrow"></i> Odległość: {{ restaurant.distance_km }} km
-            </div>
+          <span class="restaurant-name">
+            <i class="fas fa-utensils"></i> {{ restaurant.name }}
+          </span>
+          <span class="address">
+            <i class="fas fa-map-marker-alt"></i> {{ restaurant.address }}
+          </span>
+          <span class="cuisine">
+            <i class="fas fa-pepper-hot"></i> {{ restaurant.cuisine_list|default:"Brak" }}
+          </span>
+          <div class="rating">
+            <i class="fas fa-star"></i>
+            Ocena:
+            {% with rating=restaurant.average_rating %}
+              {% if rating %}
+                {{ rating|floatformat:1 }}/5
+              {% else %}
+                Brak ocen
+              {% endif %}
+            {% endwith %}
+          </div>
+          <div class="distance">
+            <i class="fas fa-location-arrow"></i> Odległość: {{ restaurant.distance_km }} km
+          </div>
         </div>
       </a>
     {% empty %}

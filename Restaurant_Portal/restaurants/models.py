@@ -4,10 +4,15 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderServiceError
 
+class CuisineType(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
 class Restaurant(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
-    cuisine_type = models.CharField(max_length=100)
+    cuisine_types = models.ManyToManyField(CuisineType, related_name='restaurants')
     latitude = models.DecimalField(
         max_digits=9, decimal_places=6, null=True, blank=True
     )
@@ -21,6 +26,10 @@ class Restaurant(models.Model):
     def get_average_rating(self):
         average = self.comments.aggregate(avg=Avg('rating'))['avg']
         return round(average, 1) if average is not None else 0.0
+    
+    @property
+    def cuisine_list(self):
+        return ", ".join(self.cuisine_types.values_list('name', flat=True))
     
     def save(self, *args, **kwargs):
         # Jeśli nie mamy współrzędnych, spróbuj geokodować na podstawie adresu

@@ -21,7 +21,8 @@
       </p>
       <p class="detail-item">
         <i class="fas fa-pepper-hot"></i>
-        <strong>Kuchnia:</strong> {{ restaurant.cuisine_type }}
+        <strong>Kuchnia:</strong>
+        {{ restaurant.cuisine_list|default:"Brak" }}
       </p>
       <p class="detail-item">
         <i class="fas fa-star"></i>
